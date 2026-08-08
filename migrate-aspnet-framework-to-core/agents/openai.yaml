@@ -1,4 +1,4 @@
 interface:
   display_name: "Migrate ASP.NET Framework to Core"
-  short_description: "Plan and verify legacy ASP.NET migrations"
-  default_prompt: "Use $migrate-aspnet-framework-to-core to assess this legacy ASP.NET application and produce a staged, testable migration plan."
+  short_description: "ASP.NET migration assessment and execution"
+  default_prompt: "Use $migrate-aspnet-framework-to-core to conduct a migration assessment and select an upgrade strategy."

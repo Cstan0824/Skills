@@ -1,8 +1,8 @@
-# Migration workflow
+# Migration execution guidelines
 
 Use the phases in order, but keep each phase small enough to compile and test. A migration may revisit a phase when a feature exposes a new dependency.
 
-## Phase 0: Baseline and scope
+## Phase 0: Migration assessment
 
 - Record the source commit/tree, target tree, target framework constraint, deployment OS, database engine/version, and external services.
 - Run the bundled audit against the source and target (if a target exists).
@@ -12,7 +12,7 @@ Use the phases in order, but keep each phase small enough to compile and test. A
 
 Stop if the target framework, database compatibility, deployment topology, or critical feature behavior is unknown and the missing fact would change architecture.
 
-## Phase 1: Project and dependency graph
+## Phase 1: Project-system modernization
 
 - Convert or recreate projects as SDK-style only when the resulting project graph is understood.
 - Establish one authoritative `<TargetFramework>` per project unless deliberate multi-targeting is required.
@@ -22,7 +22,7 @@ Stop if the target framework, database compatibility, deployment topology, or cr
 
 Gate: restore and compile an empty/host skeleton before porting feature code. Record packages that have no supported Core equivalent.
 
-## Phase 2: Host, configuration, and cross-cutting behavior
+## Phase 2: Hosting-model migration
 
 - Move `Global.asax` startup and `App_Start` registration into `Program.cs` and extension methods.
 - Bind structured settings with options; validate required production settings early.
@@ -32,7 +32,7 @@ Gate: restore and compile an empty/host skeleton before porting feature code. Re
 
 Gate: start the application with test configuration, resolve the service graph, and assert liveness/readiness behavior without requiring production credentials.
 
-## Phase 3: MVC surface and assets
+## Phase 3: MVC surface migration
 
 - Port controller inheritance and namespaces to ASP.NET Core MVC.
 - Replace `RouteConfig`/area registration with endpoint routing and explicit route patterns.
@@ -43,7 +43,7 @@ Gate: start the application with test configuration, resolve the service graph, 
 
 Gate: test an unauthenticated request, an authorized request, invalid model state, a valid form post, an upload, an area route, a static asset, and an error response.
 
-## Phase 4: Identity and security
+## Phase 4: Identity and security migration
 
 - Map legacy identity/session assumptions before selecting cookie auth, ASP.NET Core Identity, claims, or an external identity provider.
 - Apply policies/roles at controller/action/endpoint boundaries and preserve least privilege.
@@ -53,7 +53,7 @@ Gate: test an unauthenticated request, an authorized request, invalid model stat
 
 Gate: exercise login success/failure, timeout, authorization denial, antiforgery failure, session behavior, and API challenge semantics.
 
-## Phase 5: Data and integrations
+## Phase 5: Data and integration modernization
 
 - Replace EF6/provider-specific code with EF Core or a deliberate SQL/data-access boundary.
 - Keep `DbContext` scoped and queries/transactions in services.
@@ -64,7 +64,7 @@ Gate: exercise login success/failure, timeout, authorization denial, antiforgery
 
 Gate: run representative reads/writes/imports/reports against a disposable or approved test database and fixture files. Include failure/retry paths.
 
-## Phase 6: Parity and operations
+## Phase 6: Behavioral parity and operational readiness
 
 - Compare features by routes, permissions, outputs, side effects, and user-visible behavior—not file names.
 - Run unit, integration, browser, report, and publish checks.

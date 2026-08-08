@@ -1,4 +1,4 @@
-# Legacy-to-Core replacement matrix
+# Compatibility remediation guidelines
 
 Use these as decision points, not mechanical substitutions.
 
@@ -24,7 +24,7 @@ Use these as decision points, not mechanical substitutions.
 | `System.Drawing` or native Windows APIs | cross-platform library or isolated OS-specific adapter | Linux/container behavior, licensing, native asset deployment |
 | `web.config` custom errors | exception handler/problem details and safe user-facing error pages | no sensitive exception leakage, API vs HTML behavior |
 
-## Common traps
+## Compatibility risks
 
 - A package that compiles on .NET Standard may still depend on a native or Windows-only runtime component.
 - Cookie middleware can redirect API calls to a login page unless challenge events or endpoint conventions are configured.

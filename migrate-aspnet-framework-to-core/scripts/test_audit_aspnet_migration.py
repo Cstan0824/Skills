@@ -27,40 +27,40 @@ class AuditTests(unittest.TestCase):
     def make_legacy(self, root: Path) -> None:
         write(
             root,
-            "SICM/SICM.csproj",
+            "LegacyWeb/LegacyWeb.csproj",
             '''<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup><TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion><ProjectTypeGuids>legacy</ProjectTypeGuids></PropertyGroup>
 </Project>''',
         )
-        write(root, "SICM/packages.config", "<packages />")
-        write(root, "SICM/Global.asax", "<%@ Application Language=\"C#\" %>")
-        write(root, "SICM/Web.config", "<configuration><appSettings /></configuration>")
+        write(root, "LegacyWeb/packages.config", "<packages />")
+        write(root, "LegacyWeb/Global.asax", "<%@ Application Language=\"C#\" %>")
+        write(root, "LegacyWeb/Web.config", "<configuration><appSettings /></configuration>")
         write(
             root,
-            "SICM/Controllers/HomeController.cs",
+            "LegacyWeb/Controllers/HomeController.cs",
             "using System.Web;\nvar x = HttpContext.Current;\nHttpPostedFileBase file = null;\n",
         )
         write(
             root,
-            "SICM/Reports/Report.cs",
+            "LegacyWeb/Reports/Report.cs",
             "using CrystalDecisions.CrystalReports.Engine;\nusing MySql.Data.MySqlClient;\n",
         )
-        write(root, "SICM/Import.cs", "using System.Data.OleDb;\nvar value = ConfigurationManager.AppSettings[\"x\"];\n")
+        write(root, "LegacyWeb/Import.cs", "using System.Data.OleDb;\nvar value = ConfigurationManager.AppSettings[\"x\"];\n")
 
     def make_target(self, root: Path) -> None:
         write(
             root,
-            "G2G/G2G.csproj",
+            "ModernWeb/ModernWeb.csproj",
             '<Project Sdk="Microsoft.NET.Sdk.Web"><PropertyGroup><TargetFramework>net8.0</TargetFramework></PropertyGroup></Project>',
         )
         write(
             root,
-            "G2G/Program.cs",
+            "ModernWeb/Program.cs",
             "var builder = WebApplication.CreateBuilder(args);\nbuilder.Services.AddControllersWithViews();\nbuilder.Services.AddScoped<IThing, Thing>();\nvar app = builder.Build();\napp.MapControllerRoute(name: \"default\", pattern: \"{controller=Home}/{action=Index}\");\napp.Run();\n",
         )
-        write(root, "G2G/Services/Import.cs", "using MySqlConnector;\nusing ExcelDataReader;\nusing ClosedXML.Excel;\nusing Microsoft.Playwright;\npublic sealed class Upload { public IFormFile File { get; set; } }\n")
-        write(root, "G2G.Tests/G2G.Tests.csproj", '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net8.0</TargetFramework></PropertyGroup><ItemGroup><PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" /></ItemGroup></Project>')
-        write(root, "G2G.Tests/SmokeTests.cs", "using Microsoft.AspNetCore.Mvc.Testing;\nWebApplicationFactory<Program> factory = null!;\n")
+        write(root, "ModernWeb/Services/Import.cs", "using MySqlConnector;\nusing ExcelDataReader;\nusing ClosedXML.Excel;\nusing Microsoft.Playwright;\npublic sealed class Upload { public IFormFile File { get; set; } }\n")
+        write(root, "ModernWeb.Tests/ModernWeb.Tests.csproj", '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net8.0</TargetFramework></PropertyGroup><ItemGroup><PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" /></ItemGroup></Project>')
+        write(root, "ModernWeb.Tests/SmokeTests.cs", "using Microsoft.AspNetCore.Mvc.Testing;\nWebApplicationFactory<Program> factory = null!;\n")
 
     def test_legacy_evidence_and_legacy_only_mode(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -101,7 +101,7 @@ class AuditTests(unittest.TestCase):
                 target = root / "target"
                 self.make_legacy(legacy)
                 self.make_target(target)
-                write(target, f"G2G/{filename}", content)
+                write(target, f"ModernWeb/{filename}", content)
                 report = AUDIT.build_report(legacy, target)
                 self.assertIn(code, {blocker["code"] for blocker in report["blockers"]})
 
@@ -123,7 +123,7 @@ class AuditTests(unittest.TestCase):
             target = root / "target"
             self.make_legacy(legacy)
             self.make_target(target)
-            write(target, "G2G/Globalproperties.cs", "public static IHttpContextAccessor HttpContextAccessor;")
+            write(target, "ModernWeb/Globalproperties.cs", "public static IHttpContextAccessor HttpContextAccessor;")
             report = AUDIT.build_report(legacy, target)
             self.assertEqual(report["blockers"], [])
             self.assertIn("static-http-context-accessor", {warning["code"] for warning in report["warnings"]})
@@ -134,8 +134,8 @@ class AuditTests(unittest.TestCase):
             legacy = root / "legacy"
             target = root / "target"
             self.make_legacy(legacy)
-            write(target, "G2G/G2G.csproj", '<Project Sdk="Microsoft.NET.Sdk.Web"><PropertyGroup><TargetFramework>net8.0</TargetFramework></PropertyGroup></Project>')
-            write(target, "G2G/Startup.cs", "public sealed class Startup { }")
+            write(target, "ModernWeb/ModernWeb.csproj", '<Project Sdk="Microsoft.NET.Sdk.Web"><PropertyGroup><TargetFramework>net8.0</TargetFramework></PropertyGroup></Project>')
+            write(target, "ModernWeb/Startup.cs", "public sealed class Startup { }")
             report = AUDIT.build_report(legacy, target)
             self.assertIn("target-missing-modern-host", {blocker["code"] for blocker in report["blockers"]})
 
