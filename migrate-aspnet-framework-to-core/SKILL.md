@@ -5,57 +5,43 @@ description: Assess and modernize ASP.NET Framework MVC 5/System.Web application
 
 # Migrate ASP.NET Framework to Core
 
-Apply official ASP.NET Core migration patterns. Treat legacy behavior as the verification baseline.
+Apply official migration patterns. Treat legacy behavior as the verification baseline.
+
+## Principles
+
+- **Behavior over structure**: Preserve observable contracts, not legacy file or namespace layouts.
+- **Evidence over assertion**: Require reproducible evidence for compatibility, parity, and readiness claims.
+- **Risk-proportional strategy**: Select incremental or in-place migration from availability, complexity, and cutover risk.
+- **Vertical coherence**: Keep each migrated feature independently testable, deployable, and reversible.
+- **Explicit migration debt**: Assign ownership and removal criteria to every compatibility layer.
+- **Operational continuity**: Preserve security, data integrity, observability, rollback, and recovery behavior.
 
 ## Guardrails
 
-- Inspect repository instructions and preserve unrelated changes.
-- Preserve the system-under-test (SUT) contract: routes, authorization, validation, data, reports, and user flows.
-- Keep the requested target framework; do not silently retarget.
-- Use compatibility layers only as transitional architecture.
-- Do not retain service locators, `HttpContext.Current`, committed secrets, or unisolated Windows-only dependencies.
-- Do not delete the legacy application, change production traffic, or modify database schemas without explicit authorization.
+- Preserve repository instructions and unrelated changes.
+- Keep the requested target framework and migration scope.
+- Establish system boundaries, dependencies, constraints, risks, and baseline behavior before making architectural claims.
+- Replace, isolate, or retire incompatibilities against explicit acceptance criteria.
+- Classify every behavioral difference as intentional, defective, deferred, blocked, or unverified.
+- Do not delete the legacy system, change production routing, or alter schemas without explicit authorization.
+- Do not claim parity or readiness from compilation, file counts, or static analysis alone.
 
-## Workflow
+## Review rules
 
-### 1. Conduct migration assessment
+- Evaluate application behavior, architecture, compatibility, security, data, integrations, deployment, and recovery.
+- Separate baseline defects from migration regressions.
+- Prefer supported platform capabilities; keep unavoidable platform coupling behind explicit boundaries.
+- Require rollback and recovery evidence for changes with operational or data impact.
+- Report decisions, evidence, risks, migration debt, and unresolved blockers.
 
-Inventory the project graph, dependencies, platform constraints, application surface, integrations, and test coverage. Run:
+Read [migration-principles.md](references/migration-principles.md), [compatibility-rules.md](references/compatibility-rules.md), or [verification-rules.md](references/verification-rules.md) only when that concern requires more detail.
+
+## Audit rule
+
+When source or target trees are available, run:
 
 ```text
 python scripts/audit_aspnet_migration.py --legacy <legacy-root> --target <target-root>
 ```
 
-Use `--format json` for automation and `--fail-on none` for source-only analysis. Apply [migration-workflow.md](references/migration-workflow.md).
-
-### 2. Select migration strategy
-
-- **Incremental migration**: Apply the Strangler Fig pattern and side-by-side routing for large, high-risk, or continuously available systems.
-- **In-place migration**: Apply to bounded systems with acceptable cutover risk.
-- **System.Web adapters**: Apply only as an incremental compatibility layer.
-
-### 3. Define target architecture
-
-Define SDK-style projects, target frameworks, `WebApplication`, dependency injection, middleware, endpoint routing, configuration, observability, and test hosting.
-
-### 4. Perform compatibility remediation
-
-Apply [replacement-matrix.md](references/replacement-matrix.md). Replace unsupported APIs, packages, hosting constructs, data providers, and platform-specific dependencies.
-
-### 5. Execute vertical-slice migration
-
-For each feature, conduct contract mapping, characterization testing, implementation, integration testing, and regression testing before the next slice.
-
-### 6. Verify behavioral parity
-
-Apply [validation-gates.md](references/validation-gates.md). Classify each feature as `pass`, `intentional change`, `deferred`, or `blocked`. Separate baseline failures from regressions.
-
-### 7. Conduct operational-readiness review
-
-Validate publish output, deployment configuration, reverse-proxy behavior, security controls, observability, data integrity, rollback, and recovery. Never infer readiness from compilation alone.
-
-## References
-
-- [migration-workflow.md](references/migration-workflow.md): migration phases and quality gates.
-- [replacement-matrix.md](references/replacement-matrix.md): compatibility-remediation guidance.
-- [validation-gates.md](references/validation-gates.md): parity and readiness evidence.
+Use `--format json` for automation and `--fail-on none` for source-only analysis. Treat audit results as static evidence, not behavioral proof.
