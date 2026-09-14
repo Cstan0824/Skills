@@ -1,0 +1,4 @@
+interface:
+  display_name: "Task-Oriented User Manual"
+  short_description: "Action-led manuals for non-technical users"
+  default_prompt: "Use $task-oriented-user-manual to turn these product workflows into a concise, task-oriented manual for non-technical users."
